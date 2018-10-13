@@ -1,5 +1,6 @@
 # mAndroluaSDK
 nirenr的androlua sdk
+https://github.com/nirenr/AndroLua_pro
 
 使用方式:
 
