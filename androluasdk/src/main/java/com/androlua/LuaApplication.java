@@ -11,14 +11,15 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.luajava.LuaContext;
+import com.luajava.LuaGcable;
 import com.luajava.LuaState;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import com.luajava.LuaGcable;
-public abstract class LuaApplication extends Application implements LuaContext<Context> {
+
+public class LuaApplication extends Application implements LuaContext<Context> {
 
     private static LuaApplication mApp;
     static private HashMap<String, Object> data = new HashMap<String, Object>();
@@ -28,7 +29,7 @@ public abstract class LuaApplication extends Application implements LuaContext<C
     protected String luaMdDir;
     protected String luaCpath;
     protected String luaLpath;
-    //protected String luaExtDir;
+    protected String luaExtDir;
     private boolean isUpdata;
     private SharedPreferences mSharedPreferences;
 
@@ -79,6 +80,23 @@ public abstract class LuaApplication extends Application implements LuaContext<C
     }
 
     @Override
+    public ArrayList<ClassLoader> getClassLoaders() {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
+    public void regGc(LuaGcable obj) {
+        // TODO: Implement this method
+    }
+
+    @Override
+    public String getLuaPath() {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
     public String getLuaPath(String path) {
         return new File(getLuaDir(), path).getAbsolutePath();
     }
@@ -106,6 +124,18 @@ public abstract class LuaApplication extends Application implements LuaContext<C
         return getResources().getDisplayMetrics().heightPixels;
     }
 
+    @Override
+    public String getLuaDir(String dir) {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
+    public String getLuaExtDir(String dir) {
+        // TODO: Implement this method
+        return null;
+    }
+
     public String getLibDir() {
         // TODO: Implement this method
         return libDir;
@@ -125,25 +155,25 @@ public abstract class LuaApplication extends Application implements LuaContext<C
         crashHandler.init(getApplicationContext());
         mSharedPreferences = getSharedPreferences(this);
         //初始化AndroLua工作目录
-//        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-//            String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-//            luaExtDir = sdDir + "/AndroLua";
-//        } else {
-//            File[] fs = new File("/storage").listFiles();
-//            for (File f : fs) {
-//                String[] ls = f.list();
-//                if (ls == null)
-//                    continue;
-//                if (ls.length > 5)
-//                    luaExtDir = f.getAbsolutePath() + "/AndroLua";
-//            }
-//            if (luaExtDir == null)
-//                luaExtDir = getDir("AndroLua", Context.MODE_PRIVATE).getAbsolutePath();
-//        }
-//
-//        File destDir = new File(luaExtDir);
-//        if (!destDir.exists())
-//            destDir.mkdirs();
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+            luaExtDir = sdDir + "/AndroLua";
+        } else {
+            File[] fs = new File("/storage").listFiles();
+            for (File f : fs) {
+                String[] ls = f.list();
+                if (ls == null)
+                    continue;
+                if (ls.length > 5)
+                    luaExtDir = f.getAbsolutePath() + "/AndroLua";
+            }
+            if (luaExtDir == null)
+                luaExtDir = getDir("AndroLua", Context.MODE_PRIVATE).getAbsolutePath();
+        }
+
+        File destDir = new File(luaExtDir);
+        if (!destDir.exists())
+            destDir.mkdirs();
 
         //定义文件夹
         localDir = getFilesDir().getAbsolutePath();
@@ -172,6 +202,11 @@ public abstract class LuaApplication extends Application implements LuaContext<C
     public String getLuaDir() {
         // TODO: Implement this method
         return localDir;
+    }
+
+    @Override
+    public void call(String name, Object[] args) {
+        // TODO: Implement this method
     }
 
     @Override
@@ -234,31 +269,31 @@ public abstract class LuaApplication extends Application implements LuaContext<C
         return luaMdDir;
     }
 
-//    @Override
-//    public String getLuaExtDir() {
-//        // TODO: Implement this method
-//        return luaExtDir;
-//    }
+    @Override
+    public String getLuaExtDir() {
+        // TODO: Implement this method
+        return luaExtDir;
+    }
 
-//    @Override
-//    public void setLuaExtDir(String dir) {
-//        // TODO: Implement this method
-//        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-//            String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-//            luaExtDir = new File(sdDir , dir).getAbsolutePath();
-//        } else {
-//            File[] fs = new File("/storage").listFiles();
-//            for (File f : fs) {
-//                String[] ls = f.list();
-//                if (ls == null)
-//                    continue;
-//                if (ls.length > 5)
-//                    luaExtDir = new File(f, dir).getAbsolutePath() ;
-//            }
-//            if (luaExtDir == null)
-//                luaExtDir = getDir(dir, Context.MODE_PRIVATE).getAbsolutePath();
-//        }
-//    }
+    @Override
+    public void setLuaExtDir(String dir) {
+        // TODO: Implement this method
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            String sdDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+            luaExtDir = new File(sdDir , dir).getAbsolutePath();
+        } else {
+            File[] fs = new File("/storage").listFiles();
+            for (File f : fs) {
+                String[] ls = f.list();
+                if (ls == null)
+                    continue;
+                if (ls.length > 5)
+                    luaExtDir = new File(f, dir).getAbsolutePath() ;
+            }
+            if (luaExtDir == null)
+                luaExtDir = getDir(dir, Context.MODE_PRIVATE).getAbsolutePath();
+        }
+    }
 
     @Override
     public String getLuaLpath() {
@@ -279,10 +314,31 @@ public abstract class LuaApplication extends Application implements LuaContext<C
     }
 
     @Override
+    public LuaState getLuaState() {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
+    public Object doFile(String path, Object[] arg) {
+        // TODO: Implement this method
+        return null;
+    }
+
+    @Override
     public void sendMsg(String msg) {
         // TODO: Implement this method
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
     }
 
-}
+    @Override
+    public void sendError(String title, Exception msg) {
+
+    }
+
+
+} 
+
+
+
